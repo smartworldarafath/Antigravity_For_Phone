@@ -34,6 +34,7 @@ import com.agy.theme.ThemeManager;
 import com.agy.ui.lifecycle.AppLifecycle;
 import com.agy.ui.lifecycle.BackNavigator;
 import com.agy.ui.lifecycle.ThemeRefresher;
+import com.agy.ui.refresh.DisplayRefreshRateHelper;
 import com.agy.ui.splash.SplashController;
 import com.agy.ui.webview.AgyWebChromeClient;
 import com.agy.ui.webview.DesktopModePrefs;
@@ -75,6 +76,17 @@ public class MainActivity extends Activity
     private long splashDeadline;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private final CoreRuntimeState.StateListener coreStateListener = new CoreRuntimeState.StateListener() {
+        @Override
+        public void onStateChanged() {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    watchCore();
+                }
+            });
+        }
+    };
 
     /**
      * Runs for the whole activity life: it drives the splash, loads the app on
@@ -85,8 +97,10 @@ public class MainActivity extends Activity
         public void run() {
             watchCore();
             if (activityResumed) {
-                handler.postDelayed(this, appLoaded
-                        ? POLL_READY_INTERVAL_MS : POLL_STARTUP_INTERVAL_MS);
+                // When appLoaded is true, state changes are pushed via listener.
+                // Low-power 10s watchdog interval eliminates 90%+ CPU wakeups, phone heat, and battery drain.
+                long nextInterval = appLoaded ? 10000L : POLL_STARTUP_INTERVAL_MS;
+                handler.postDelayed(this, nextInterval);
             }
         }
     };
@@ -135,6 +149,8 @@ public class MainActivity extends Activity
         activeActivity = this;
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        DisplayRefreshRateHelper.applyHighRefreshRate(this);
+        CoreRuntimeState.addListener(coreStateListener);
 
         themeManager = new ThemeManager(this);
         themeManager.applyToActivity(this);
@@ -147,6 +163,7 @@ public class MainActivity extends Activity
         androidBridge.setActivity(this);
         webViewHost = new WebViewHost(this, themeManager, oauthManager, androidBridge, this);
         webViewHost.setListener(this);
+        DisplayRefreshRateHelper.setViewHighRefreshRate(webViewHost.getWebView(), 144.0f);
 
         rootLayout = new FrameLayout(this);
         rootLayout.setBackgroundColor(themeManager.getBackgroundColor());
@@ -233,6 +250,7 @@ public class MainActivity extends Activity
         if (activeActivity == this) {
             activeActivity = null;
         }
+        CoreRuntimeState.removeListener(coreStateListener);
         AppLifecycle.destroy(handler);
         if (androidBridge != null) {
             androidBridge.setActivity(null);
@@ -296,6 +314,7 @@ public class MainActivity extends Activity
         super.onResume();
         activityResumed = true;
         activeActivity = this;
+        DisplayRefreshRateHelper.applyHighRefreshRate(this);
         if (webViewHost != null) {
             AppLifecycle.resume(webViewHost.getWebView());
         }

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.agy"
-    android:versionCode="17"
-    android:versionName="2.4.1">
+    android:versionCode="100"
+    android:versionName="1.0.0">
 
     <!-- targetSdk 28 is REQUIRED: Android 10+ (W^X) only allows exec of a binary
          from the app data dir when the app targets API <= 28. The core + glibc
@@ -71,6 +71,7 @@
         -->
         <activity
             android:name="com.agy.ui.MainActivity"
+            android:hardwareAccelerated="true"
             android:exported="false"
             android:theme="@style/SplashTheme"
             android:launchMode="singleTask"
@@ -83,6 +84,7 @@
 
         <activity
             android:name="com.agy.ui.launcher.LauncherDarkActivity"
+            android:hardwareAccelerated="true"
             android:enabled="true"
             android:exported="true"
             android:theme="@style/SplashThemeDark"
@@ -100,6 +102,7 @@
 
         <activity
             android:name="com.agy.ui.launcher.LauncherLightActivity"
+            android:hardwareAccelerated="true"
             android:enabled="false"
             android:exported="true"
             android:theme="@style/SplashThemeLight"

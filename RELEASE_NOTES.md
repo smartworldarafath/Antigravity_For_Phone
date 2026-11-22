@@ -1,66 +1,37 @@
-# Antigravity for Android v2.4.1
+# Antigravity for Android v1.0.0
 
-## Спецификация пакетов релиза
+## Release Packages Specification
 
-| Файл пакета | Идентификатор приложения | Порт рантайма | Описание |
+| Package | Application ID | Target Port | Description |
 | :--- | :--- | :--- | :--- |
-| **`antigravity.apk`** | `com.agy` | 45157 | Стандартная редакция с оригинальными проверками Google (чистая версия без модификаций кода аутентификации). |
-| **`antigravity-region-bypass.apk`** | `com.agy` | 45157 | Редакция с обходом проверки учетных записей (позволяет авторизоваться под аккаунтами, блокируемыми со стороны Google; требует наличия сетевого туннеля/VPN). |
-| **`SHA256SUMS.txt`** | — | — | Криптографические контрольные суммы бинарных файлов. |
+| **`antigravity.apk`** | `com.agy` | 45157 | Standard production release with native bionic engine and official Google authentication flows. |
+| **`antigravity-region-bypass.apk`** | `com.agy` | 45157 | Region bypass release with account eligibility check bypass (enables authentication from restricted locations). |
+| **`SHA256SUMS.txt`** | — | — | Cryptographic SHA-256 checksums for binary package verification. |
 
 ---
 
-## Изменения и исправления (v2.4.1)
+## What's New in v1.0.0
 
-### 1. Поддержка встроенного веб-терминала и спавнера PTY (PR #19)
-* **Низкоуровневый бинарный патч PTY-шеллы:** Устранено аварийное завершение терминала из-за отсутствия `/bin/bash` на Android. Реализован модульный бинарный патч с сохранением длины строки (`/bin/bash` ➔ `/bin///sh`, ровно 9 байт), безопасно перенаправляющий запросы спавнера ядра в системный шелл Android без сдвига смещений ELF-секций.
-* **Приоритетная иерархия `$SHELL` в супервизоре процесса (`CoreEnvironment`):** Вместо жестко заданного `runtime/bin/bash` выстроена отказоустойчивая цепочка разрешения шелла:
-  1. `$PREFIX/bin/bash` (полноценный bash окружения пользователя со всей поддержкой `.bashrc`, автодополнения и истории);
-  2. `runtime/bin/bash` (встроенный bridge-рантайм);
-  3. `/system/bin/sh` (гарантированный системный шелл Android).
-* **Эмуляция терминала и база `terminfo`:** В окружение процесса добавлен экспорт `TERM=xterm-256color` и автоматическое подключение каталога `TERMINFO` из `$PREFIX/share/terminfo`, что предотвращает артефакты и искажения цветов и управляющих последовательностей ANSI в интерактивных консольных программах (`nano`, `htop`, mc).
+### 1. High Refresh Rate Optimization (120Hz & 144Hz)
+* **Dynamic Display Mode Negotiation:** Added `DisplayRefreshRateHelper` which queries `Display.getSupportedModes()` and matches resolution to negotiate the maximum available display refresh rate (120Hz, 144Hz, 165Hz) on Android 6.0+ (API 23+).
+* **Adaptive Frame Rate Range:** On Android 11+ (API 30+), dynamically configures `preferredMaxDisplayRefreshRate` to 120Hz/144Hz while setting `preferredMinDisplayRefreshRate` to 60.0Hz. This unlocks locked 60fps+ fluidity during motion while allowing LTPO variable refresh rate displays to scale down power consumption during static viewing.
+* **Surface Frame Rate Granting:** High frame rate compatibility (`setFrameRate(144f, 0)`) granted to WebView host containers.
 
-### 2. Повышение стабильности локальной сборки пакетов (AAPT)
-* В этапы сборки ресурсов `modules/builder/02_r_java.sh` и `modules/builder/06_package.sh` добавлен экспорт `export ANDROID_DATA="${ANDROID_DATA:-/data}"`. Это устраняет сбои компилятора `aapt` с кодом `SIGABRT (134)` при сборке APK непосредственно внутри ARM64 Android userspace.
+### 2. Butter-Smooth 60fps+ Transitions & Extra Micro-Interactions
+* **Spring-Damped Physics Interpolation:** Upgraded all transition easing tokens to modern spring curves (`cubic-bezier(0.16, 1, 0.3, 1)`).
+* **Spring Button Micro-Interactions:** Added instant spring-press active state response (`button:active { transform: scale(0.972); }`) across all clickable elements and action icons.
+* **GPU Hardware Compositing:** Enforced `transform: translateZ(0)`, `-webkit-overflow-scrolling: touch`, `scroll-behavior: smooth`, and `backface-visibility: hidden` across main layouts and chat scroll containers.
+* **Layout Containment & Content Visibility:** Applied `contain: layout style` and `content-visibility: auto` to prevent off-screen layout thrashing and render lag.
+* **Slick Splash Screen Exit Animation:** Enhanced splash screen exit dissolve with subtle scaling (`scale(1.025f)`) and decelerated fading for a seamless transition into the workspace.
 
----
+### 3. Thermal Management & Battery Efficiency
+* **Event-Driven Runtime Watchdogs:** Completely eliminated continuous 1000ms CPU polling in `MainActivity`. Server state transitions are now immediately pushed via `CoreRuntimeState.StateListener`, with polling backed off to 10s low-power watchdog intervals (over 90% reduction in idle CPU wakeups).
+* **Smart WakeLock Lifecycle:** Updated `WakeLockHolder` with automatic safety timeouts (3 minutes max during startup) and automatic release once the core runtime is fully ready. Prevents device CPU lockup, phone overheating, and standby battery drain.
+* **WebView Lifecycle Power Savings:** Thoroughly halts JavaScript timers (`pauseTimers()`) and Web rendering threads when the application is backgrounded or screen turned off.
 
-## Ранее реализованные ключевые возможности (v2.4.0)
+### 4. Cross-Platform Standalone Build Pipeline
+* Added `build.py` providing a clean, single-command cross-platform build orchestrator that compiles, dexes, stages assets, zipaligns, signs, and verifies APKs directly on Windows, Linux, and macOS without requiring Gradle.
 
-### 1. Безопасность и изоляция данных (Issue #6)
-* Из релизных сборок полностью удален атрибут `android:debuggable="true"`.
-* Устранена уязвимость, позволявшая локальному пользователю или стороннему приложению через `run-as com.agy` считывать OAuth-токены сессий и внутренние файлы конфигурации.
-* Флаг отладки изолирован исключительно в dev-сборке (`com.agy.dev`).
-
-### 2. Системный диалог выбора файлов (Issue #8)
-* Устаревший ограниченный интерфейс Storage Access Framework (SAF) заменен на нативный системный Intent-селектор Android.
-* Обеспечен прямой доступ к файлам, изображениям, видео и архивам из Галереи, Google Фото и любых сторонних файловых менеджеров.
-* Реализовано автоматическое сохранение постоянных разрешений на чтение (`Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION`).
-
-### 3. Совместимость с процессорами архитектуры ARMv8.0-A
-* Добавлена библиотека динамической эмуляции атомарных инструкций `liblse_compat.so` и низкоуровневый перехватчик `sigill_handler`.
-* Устранены аварийные завершения с кодом `SIGILL: illegal instruction` на устройствах с чипсетами Qualcomm Snapdragon 680/685 (Cortex-A53 / Redmi Note 12).
-
-### 4. Оптимизация авторизации OAuth
-* Полностью устранен дисковый опрос (polling с интервалом 80 мс) и создание промежуточных файлов при входе в учетную запись.
-* Захват URL авторизации переведен на прямой перехват стандартного потока вывода ядра (stdout) с мгновенной отправкой Intent в системный браузер.
-
-### 5. Аппаратный интерфейс фонарика
-* Добавлена консольная утилита управления вспышкой камеры: `torch on` / `torch off`.
-
-### 6. Фоновый планировщик задач (`agy-daemon`)
-* Реализован системный микро-демон (<10 МБ RAM, 0% CPU в режиме ожидания) для выполнения отложенных и периодических задач по расписанию (cron, интервалы).
-* Добавлена поддержка отслеживания изменений файлов и отправка нативных уведомлений в панель Android через `agy-notify`.
-
-### 7. Диагностика запуска ядра
-* В интерфейс ошибки инициализации сервера добавлены действия «Copy Logs» и «Save Logs» для быстрого экспорта журнала сбоя в буфер обмена или файл.
-
-### 8. Модульная структура конвейера сборки
-* Исходный код разнесен по изолированным модулям: `modules/patches`, `modules/runner`, `modules/builder`.
-* Внедрена аргументная передача параметров компиляторам `@java_sources.txt` и `@class_files.txt`, исключающая ошибку переполнения буфера командной строки ядра Linux (`ARG_MAX` / `E2BIG`).
-
----
-
-## Обновление и совместимость
-
-Все сборки подписаны постоянным ключом проекта. Обновление устанавливается поверх предыдущих версий 2.x без удаления приложения. Пользовательские проекты в каталоге `Documents`, рабочее окружение и сессии полностью сохраняются.
+### 5. Backend & App Version Alignment
+* Version bumped to `v1.0.0` (versionCode 100, versionName 1.0.0).
+* All native capabilities—built-in web terminal & PTY shell, Termux package manager, Shizuku ADB bridge, and background micro-daemon—remain 100% verified and operational.

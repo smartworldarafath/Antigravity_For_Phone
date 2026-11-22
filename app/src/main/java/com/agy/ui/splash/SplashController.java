@@ -122,7 +122,10 @@ public final class SplashController {
         dismissed = true;
         view.animate()
                 .alpha(0f)
-                .setDuration(280)
+                .scaleX(1.025f)
+                .scaleY(1.025f)
+                .setDuration(300)
+                .setInterpolator(new android.view.animation.DecelerateInterpolator(2.0f))
                 .withEndAction(new Runnable() {
                     @Override
                     public void run() {

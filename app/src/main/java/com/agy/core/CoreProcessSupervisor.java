@@ -125,6 +125,7 @@ public final class CoreProcessSupervisor {
                             + " times; giving up (last exit code " + code + ")"
                             + (tail.isEmpty() ? "" : "\n--- core.log tail ---\n" + tail);
                     CoreLogWriter.writeLine(log, CoreRuntimeState.lastError);
+                    CoreRuntimeState.notifyStateChanged();
                     com.agy.log.CrashRecorder.recordCrash(appContext, code, System.currentTimeMillis() - readyAt, CoreRuntimeState.lastError, logBuffer);
                     break;
                 }
@@ -136,6 +137,7 @@ public final class CoreProcessSupervisor {
                         + (tail.isEmpty() ? "" : "\n--- core.log tail ---\n" + tail);
                 Log.w(TAG, CoreRuntimeState.lastError);
                 CoreLogWriter.writeLine(log, CoreRuntimeState.lastError);
+                CoreRuntimeState.notifyStateChanged();
                 com.agy.log.CrashRecorder.recordCrash(appContext, code, System.currentTimeMillis() - readyAt, CoreRuntimeState.lastError, logBuffer);
                 CoreLogWriter.closeQuietly(log);
                 log = null;
@@ -177,6 +179,7 @@ public final class CoreProcessSupervisor {
                 CoreRuntimeState.lastError = null;
                 CoreRuntimeState.restarting = false;
                 CoreRuntimeState.readyGeneration++;
+                CoreRuntimeState.notifyStateChanged();
                 String readyStatus = "core ready on 127.0.0.1:" + port;
                 Log.i(TAG, readyStatus);
                 CoreLogWriter.writeLine(log, readyStatus);

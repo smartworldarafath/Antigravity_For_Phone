@@ -32,8 +32,15 @@ def stage_assets(staging_dir, no_bypass=False):
     if os.path.isdir(web_src):
         web_build_script = os.path.join(web_src, "build.sh")
         if os.path.isfile(web_build_script):
-            print(f"[*] Building web bundles via {web_build_script}...")
-            subprocess.check_call(["bash", web_build_script], cwd=PROJECT_ROOT)
+            generated_main = os.path.join(web_src, "generated", "main.js")
+            if not os.path.isfile(generated_main):
+                print(f"[*] Building web bundles via {web_build_script}...")
+                bash_bin = "bash"
+                if sys.platform == "win32" and os.path.isfile(r"C:\Program Files\Git\bin\bash.exe"):
+                    bash_bin = r"C:\Program Files\Git\bin\bash.exe"
+                subprocess.check_call([bash_bin, web_build_script], cwd=PROJECT_ROOT)
+            else:
+                print("[*] Reusing pre-built web bundles in web/generated...")
 
         print(f"[*] Staging web assets from {web_src} -> {web_dst}...")
         if os.path.exists(web_dst):

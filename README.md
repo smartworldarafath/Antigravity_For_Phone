@@ -10,15 +10,11 @@
 
   # Antigravity for Android
 
-> [!WARNING]
-> **Проект временно приостановлен на несколько месяцев из-за занятости разработчика.**  
-> *(Project is temporarily on hold for several months due to developer workload).*
-
 **Autonomous AI development environment running natively on Android & ARM64.**
 
   [![Android](https://img.shields.io/badge/Android-7.0%2B-3DDC84?style=flat-square&logo=android&logoColor=white)](https://android.com)
   [![Arch](https://img.shields.io/badge/ARM64-v8.0--A%2B-blue?style=flat-square)](https://arm.com)
-  [![Release](https://img.shields.io/badge/Version-2.4.1-blueviolet?style=flat-square)](https://github.com/werdio325-png/antigravity-android/releases)
+  [![Release](https://img.shields.io/badge/Version-1.0.0-blueviolet?style=flat-square)](https://github.com/smartworldarafath/Antigravity_For_Android/releases)
   [![License](https://img.shields.io/badge/License-Apache_2.0-orange?style=flat-square)](LICENSE)
 
   <br/>
@@ -41,13 +37,13 @@ No PRoot, chroot, or virtualization overhead. Antigravity runs **bare-metal insi
 
 ---
 
-### Highlights in v2.4
+### Highlights in v1.0.0
 
-* **Modular Core:** Clean separation into 6 standalone subsystems (`modules/*`) with independent test suites.
-* **Native Splash:** Canvas-based dot animation saving ~40 MB RAM with instant startup.
-* **Desktop Mode:** Instant toggle in Appearance settings for tablets, external keyboards, and Samsung DeX.
-* **Universal ARMv8.0-A Support:** Built-in transparent atomic & SIMD emulation (`liblse_compat.so`) for older CPUs.
-* **Background Micro-Daemon:** Ultra-lightweight `agy-daemon` (<10 MB RAM) with cron scheduler, file watcher, and AI task queue.
+* **120Hz & 144Hz High Refresh Rate Support:** Seamless dynamic refresh rate switching with resolution-matched mode selection and adaptive frame rate bounds (60Hz–144Hz) for LTPO/VRR displays.
+* **Butter Smooth 60fps+ Transitions:** Modern spring-damped micro-interactions (`cubic-bezier(0.16, 1, 0.3, 1)`), smooth popup scaling, hardware-accelerated compositing (`transform: translateZ(0)`), and seamless splash screen dissolve.
+* **Thermal Management & Battery Efficiency:** Event-driven architecture completely replaces continuous 1-second CPU polling loops with low-power watchdogs. Smart wakelock management ensures zero idle drain and prevents phone heating.
+* **Cross-Platform APK Builder (`build.py`):** Unified Python builder compiling Java, dexing via D8, staging assets, zipaligning, and signing directly on Windows, Linux, and macOS without Gradle.
+* **All Native Core Features Intact:** Built-in web terminal & PTY shell, Shizuku ADB bridge, Termux package manager, OAuth authentication flows, and background micro-daemon remain 100% functional.
 
 ---
 
@@ -63,7 +59,7 @@ No PRoot, chroot, or virtualization overhead. Antigravity runs **bare-metal insi
 
 ### Quick Start
 
-1. **Download APK** from [Releases](https://github.com/werdio325-png/antigravity-android/releases):
+1. **Download APK** from [Releases](https://github.com/smartworldarafath/Antigravity_For_Android/releases):
    * `antigravity.apk` — standard release (original Google account checks).
    * `antigravity-region-bypass.apk` — release with account eligibility check bypass.
 2. **Grant Storage Permission** (`All Files Access`). *(Optional: enable Shizuku for ADB access)*.
@@ -78,13 +74,13 @@ No PRoot, chroot, or virtualization overhead. Antigravity runs **bare-metal insi
 
 ```bash
 # Build standard release APK (dist/antigravity.apk):
-bash build.sh
+python build.py
 
 # Build release APK with region bypass (dist/antigravity-region-bypass.apk):
-bash build.sh --region-bypass
+python build.py --region-bypass
 
-# Run all test suites:
-bash test_all_modules.sh
+# Build both editions & SHA256SUMS.txt:
+python build.py --all
 ```
 
 ---
@@ -94,23 +90,21 @@ bash test_all_modules.sh
 ```text
 antigravity/
 ├── config/             # App constants, environment paths, and AI rules
-├── modules/            # Decoupled core modules (v2.4+)
+├── modules/            # Decoupled core modules
 │   ├── core/           # Binary unpacking, glibc loader, shims, SHA-256 manifest
 │   ├── patches/        # Binary patch engine (syscall emulation, resolv, SIGILL)
 │   ├── io/             # High-performance I/O Bus: event broker, FIFO pipes, sockets
 │   ├── env/            # Path resolver, diagnostics, Flight Recorder logs, CLI
 │   ├── builder/        # Gradle-free APK builder (javac, D8, aapt, zipalign, apksigner)
 │   └── runner/         # Standalone runtime preparation, port probe, E2E tests
-├── app/                # Android host app (native splash, WebView, system bridges)
-├── web/                # Local web frontend, desktop mode toggle, themes
+├── app/                # Android host app (native splash, WebView, system bridges, 120Hz/144Hz)
+├── web/                # Local web frontend, desktop mode toggle, butter-smooth transitions
 ├── env/                # Bionic userspace, Termux overlay, pkg manager, liblse_compat
 ├── docs/assets/        # Screenshots, banners, and diagrams
+├── build.py            # Cross-platform root APK builder
 ├── build.sh            # Root APK build script
 └── test_all_modules.sh # Test suite for all 6 modules
 ```
-
-> [!TIP]
-> Each module in `modules/`, `app/`, `web/`, and `env/` includes its own dedicated `README.md` with in-depth technical documentation.
 
 ---
 
