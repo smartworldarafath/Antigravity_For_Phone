@@ -1,4 +1,4 @@
-name: Build and Release Antigravity APKs
+name: Build and Release Antigravity for Phone
 
 on:
   push:
@@ -30,7 +30,7 @@ permissions:
 
 jobs:
   build:
-    name: Build Both Release Editions
+    name: Build All Editions (Android APKs & iOS IPA)
     runs-on: ubuntu-latest
 
     steps:
@@ -93,7 +93,7 @@ jobs:
             export AGY_HOME="$PWD/vendor"
           fi
 
-      - name: Build Both Release Editions (dist/antigravity.apk & dist/antigravity-region-bypass.apk)
+      - name: Build All Editions (Android APKs & iOS IPA)
         run: |
           python3 build.py --all
 
@@ -108,6 +108,7 @@ jobs:
           path: |
             dist/antigravity.apk
             dist/antigravity-region-bypass.apk
+            dist/antigravity.ipa
             dist/SHA256SUMS.txt
 
       - name: Publish GitHub Release
@@ -115,37 +116,13 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.inputs.tag_name || github.ref_name }}
-          name: ${{ format('Antigravity for Android {0}', github.event.inputs.tag_name || github.ref_name) }}
+          name: ${{ format('Antigravity for Phone {0}', github.event.inputs.tag_name || github.ref_name) }}
           draft: ${{ github.event.inputs.draft || false }}
           prerelease: ${{ github.event.inputs.prerelease || false }}
           make_latest: true
           files: |
             dist/antigravity.apk
             dist/antigravity-region-bypass.apk
+            dist/antigravity.ipa
             dist/SHA256SUMS.txt
-          body: |
-            <div align="center">
-              <h3>Antigravity for Android v1.0.0</h3>
-              <p>Autonomous AI Coding Environment &bull; Native Bionic Userspace &bull; ARM64</p>
-            </div>
-
-            ---
-
-            ### Packages & Artifacts
-
-            | Package | Description |
-            | :--- | :--- |
-            | **`antigravity.apk`** | Standard production release with native bionic engine (com.agy, port 45157) |
-            | **`antigravity-region-bypass.apk`** | Region bypass edition with account eligibility check bypass (com.agy, port 45157) |
-            | **`SHA256SUMS.txt`** | Cryptographic checksums for package integrity verification |
-
-            ---
-
-            ### Key Highlights in v1.0.0
-
-            * **High Refresh Rate Support (120Hz & 144Hz):** Fully optimized display mode switching for 120Hz, 144Hz, and 165Hz high-refresh displays with dynamic resolution matching and preferred display rate scaling.
-            * **Butter Smooth 60fps+ Animations & Transitions:** All UI transitions, dialogs, drawers, and buttons upgraded with spring-eased micro-interactions (`cubic-bezier(0.16, 1, 0.3, 1)`), smooth popup scaling, and GPU layer acceleration (`transform: translateZ(0)`).
-            * **Thermal Management & Battery Efficiency:** Replaced continuous 1-second CPU polling loops with an event-driven state change architecture. Smart wakelock management prevents unnecessary CPU wakeups, completely eliminating standby battery drain and device heating.
-            * **Cross-Platform APK Builder (`build.py`):** Unified single-command APK builder supporting Windows, Linux, and macOS without requiring Gradle.
-            * **Backend & App Versioning:** Version aligned to v1.0.0 (versionCode 100).
-            * **All Native Core Features Intact:** Built-in web terminal & PTY shell, Shizuku ADB bridge, Termux package manager, OAuth flows, and background micro-daemon remain 100% functional.
+          body_path: RELEASE_NOTES.md

@@ -3,6 +3,7 @@ build/
 dist/
 cache/
 *.apk
+*.ipa
 *.dex
 *.class
 

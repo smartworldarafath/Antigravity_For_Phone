@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
-build.py - Cross-platform APK builder and packager for Antigravity for Android.
+build.py - Cross-platform APK & IPA builder and packager for Antigravity for Phone.
 Works on Windows, Linux, and macOS without requiring Gradle.
 
 Usage:
   python build.py                  # Build standard release (dist/antigravity.apk)
   python build.py --region-bypass  # Build region-bypass release (dist/antigravity-region-bypass.apk)
-  python build.py --all            # Build both release editions and SHA256SUMS.txt
+  python build.py --ios            # Build iOS & iPadOS package (dist/antigravity.ipa)
+  python build.py --all            # Build all editions (Android APKs + iOS IPA) and SHA256SUMS.txt
 """
 
 import sys
@@ -23,11 +24,15 @@ DIST_DIR = os.path.join(PROJECT_ROOT, "dist")
 APP_DIR = os.path.join(PROJECT_ROOT, "app")
 TOOLS_DIR = os.path.join(PROJECT_ROOT, "tools")
 MODULES_DIR = os.path.join(PROJECT_ROOT, "modules")
+IOS_DIR = os.path.join(PROJECT_ROOT, "ios")
 
 if MODULES_DIR not in sys.path:
     sys.path.insert(0, MODULES_DIR)
+if IOS_DIR not in sys.path:
+    sys.path.insert(0, IOS_DIR)
 
 from runner import prepare_runtime
+import build_ipa
 
 
 def find_build_tool(tool_name):
@@ -260,10 +265,20 @@ def build_edition(tools, no_bypass=False, out_apk=None):
     return out_apk
 
 
-def compute_checksums(files):
+def compute_checksums(files=None):
     sums_file = os.path.join(DIST_DIR, "SHA256SUMS.txt")
+    target_files = []
+    if files:
+        for f in files:
+            if f and f not in target_files:
+                target_files.append(f)
+    for fname in ["antigravity.apk", "antigravity-region-bypass.apk", "antigravity.ipa"]:
+        p = os.path.join(DIST_DIR, fname)
+        if os.path.isfile(p) and p not in target_files:
+            target_files.append(p)
+
     lines = []
-    for path in files:
+    for path in sorted(target_files, key=lambda p: os.path.basename(p)):
         if os.path.isfile(path):
             hasher = hashlib.sha256()
             with open(path, "rb") as f:
@@ -279,16 +294,27 @@ def compute_checksums(files):
 
 
 def main():
+    args = sys.argv[1:]
+
+    # Dedicated iOS build mode (does not require Android SDK)
+    if "--ios" in args or "--ipa" in args:
+        ipa = build_ipa.build_ipa()
+        compute_checksums([ipa])
+        print("\n" + "=" * 60)
+        print("  IOS & IPADOS PACKAGE (.IPA) SUCCESSFULLY BUILT!")
+        print("=" * 60 + "\n")
+        return
+
     tools = ensure_tools()
     print(f"Build tools detected:")
     for k, v in tools.items():
         print(f"  {k:10} -> {v}")
 
-    args = sys.argv[1:]
     if "--all" in args:
         apk1 = build_edition(tools, no_bypass=True)
         apk2 = build_edition(tools, no_bypass=False)
-        compute_checksums([apk1, apk2])
+        ipa = build_ipa.build_ipa()
+        compute_checksums([apk1, apk2, ipa])
     elif "--region-bypass" in args or "--bypass" in args:
         apk = build_edition(tools, no_bypass=False)
         compute_checksums([apk])
@@ -297,7 +323,7 @@ def main():
         compute_checksums([apk])
 
     print("\n" + "=" * 60)
-    print("  ALL REQUESTED APKS SUCCESSFULLY BUILT AND VERIFIED!")
+    print("  ALL REQUESTED PACKAGES SUCCESSFULLY BUILT AND VERIFIED!")
     print("=" * 60 + "\n")
 
 
