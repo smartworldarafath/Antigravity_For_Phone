@@ -34,6 +34,41 @@
 
 ---
 
+
+<div align="center">
+
+### 🛠️ Languages & Tech Stack
+
+<p>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/smartworldarafath/smartworldarafath/main/assets/readme/dark/pill-js.svg" />
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/smartworldarafath/smartworldarafath/main/assets/readme/light/pill-js.svg" />
+    <img src="https://raw.githubusercontent.com/smartworldarafath/smartworldarafath/main/assets/readme/dark/pill-js.svg" alt="JavaScript" />
+  </picture>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/smartworldarafath/smartworldarafath/main/assets/readme/dark/pill-java.svg" />
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/smartworldarafath/smartworldarafath/main/assets/readme/light/pill-java.svg" />
+    <img src="https://raw.githubusercontent.com/smartworldarafath/smartworldarafath/main/assets/readme/dark/pill-java.svg" alt="Java" />
+  </picture>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/smartworldarafath/smartworldarafath/main/assets/readme/dark/pill-css.svg" />
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/smartworldarafath/smartworldarafath/main/assets/readme/light/pill-css.svg" />
+    <img src="https://raw.githubusercontent.com/smartworldarafath/smartworldarafath/main/assets/readme/dark/pill-css.svg" alt="CSS3" />
+  </picture>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/smartworldarafath/smartworldarafath/main/assets/readme/dark/pill-python.svg" />
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/smartworldarafath/smartworldarafath/main/assets/readme/light/pill-python.svg" />
+    <img src="https://raw.githubusercontent.com/smartworldarafath/smartworldarafath/main/assets/readme/dark/pill-python.svg" alt="Python" />
+  </picture>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/smartworldarafath/smartworldarafath/main/assets/readme/dark/pill-shell.svg" />
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/smartworldarafath/smartworldarafath/main/assets/readme/light/pill-shell.svg" />
+    <img src="https://raw.githubusercontent.com/smartworldarafath/smartworldarafath/main/assets/readme/dark/pill-shell.svg" alt="Shell" />
+  </picture>
+</p>
+
+</div>
+
 ## Overview
 
 Antigravity for Phone brings complete, autonomous AI coding workflows straight into your pocket. Built from the ground up for modern smartphones and tablets, Antigravity empowers developers to run agentic coding workflows locally on Android devices, iPhones, and iPads without clunky desktop tethering or cloud server dependencies.
